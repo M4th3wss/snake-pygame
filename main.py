@@ -54,10 +54,11 @@ while True:
         if e.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
     screen.fill(BG)
     for seg in snake:
         draw_cell(seg, SNAKE_COLOR)
     draw_cell(food, FOOD_COLOR)
     draw_grid()
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(10)
