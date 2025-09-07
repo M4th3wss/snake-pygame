@@ -1,10 +1,12 @@
+from tkinter import CENTER
+from turtle import left
 import pygame
 import sys
 import random
 
 
 BLOCK = 20
-COLS, ROWS = 48, 24
+COLS, ROWS = 32, 24
 WIDTH, HEIGHT = COLS*BLOCK, ROWS*BLOCK
 
 pygame.init()
@@ -36,7 +38,18 @@ def draw_cell(pos, color):
 
 snake = [(COLS//2, ROWS//2), (COLS//2, ROWS//2), (COLS//2, ROWS//2)]
 
-# FOOD
+# Score
+score = 0
+test_font = pygame.font.Font('Minecraft.ttf', 50)
+
+
+def show_score():
+    txt_surf = test_font.render(f"Score: {score}", False, (255, 255, 0))
+    txt_rect = txt_surf.get_rect(center=(350, 50))
+    screen.blit(txt_surf, txt_rect)
+
+
+    # FOOD
 food = None
 
 
@@ -60,7 +73,7 @@ def draw_grid():
 
 
 def move_snake():
-    global snake, food
+    global snake, food, score
     # თავის პოზიცია
     head_x, head_y = snake[0]
 
@@ -79,6 +92,7 @@ def move_snake():
 
     if new_head == food:
         food = spawn_food(set(snake))
+        score += 1
     else:
         snake.pop()
 
@@ -106,5 +120,6 @@ while is_running:
         draw_cell(seg, SNAKE_COLOR)
     draw_cell(food, FOOD_COLOR)
     draw_grid()
+    show_score()
     pygame.display.flip()
     clock.tick(10)
