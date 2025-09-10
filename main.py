@@ -1,4 +1,4 @@
-from tkinter import CENTER
+from tkinter import CENTER, W
 from turtle import left
 import pygame
 import sys
@@ -45,9 +45,8 @@ test_font = pygame.font.Font('Minecraft.ttf', 50)
 
 def show_score():
     txt_surf = test_font.render(f"Score: {score}", False, (255, 255, 0))
-    txt_rect = txt_surf.get_rect(center=(350, 50))
+    txt_rect = txt_surf.get_rect(center=(WIDTH / 2, HEIGHT - 420))
     screen.blit(txt_surf, txt_rect)
-
 
     # FOOD
 food = None
@@ -61,6 +60,9 @@ def spawn_food(snake_set):
 
 
 food = spawn_food(set(snake))
+# GameStates
+game_state = "playing"
+
 
 # GRID
 
@@ -73,7 +75,7 @@ def draw_grid():
 
 
 def move_snake():
-    global snake, food, score
+    global snake, food, score, game_state
     # თავის პოზიცია
     head_x, head_y = snake[0]
 
@@ -84,8 +86,11 @@ def move_snake():
 
     if (new_head[0] < 0 or new_head[0] >= COLS or
             new_head[1] < 0 or new_head[1] >= ROWS):
+        game_state = "game_over"
         return False
+
     if new_head in snake:
+        game_state = "game_over"
         return False
 
     snake.insert(0, new_head)
@@ -99,27 +104,75 @@ def move_snake():
     return True
 
 
+# GameOver
+def draw_game_over():
+    overlay = pygame.Surface((WIDTH, HEIGHT))
+    overlay.set_alpha(128)
+    overlay.fill((0, 0, 0))
+    screen.blit(overlay, (0, 0))
+
+    # Game Over text
+    gameover_txt_surf = test_font.render("GAME OVER", False, (255, 100, 100))
+    gameover_txt_rect = gameover_txt_surf.get_rect(
+        center=(WIDTH//2, HEIGHT//2 - 60))
+    screen.blit(gameover_txt_surf, gameover_txt_rect)
+
+    # Final score text
+    score_txt_surf = test_font.render(
+        f"Final Score: {score}", False, (255, 255, 0))
+    score_txt_rect = score_txt_surf.get_rect(center=(WIDTH//2, HEIGHT//2 - 10))
+    screen.blit(score_txt_surf, score_txt_rect)
+
+    # Restart instruction
+    restart_txt_surf = test_font.render(
+        "Press R to Restart", False, (100, 255, 100))
+    restart_txt_rect = restart_txt_surf.get_rect(
+        center=(WIDTH//2, HEIGHT//2 + 40))
+    screen.blit(restart_txt_surf, restart_txt_rect)
+
+# ResetGame
+
+
+def reset_game():
+    global snake, food, score, DIRECTION, game_state
+    snake = [(COLS//2, ROWS//2), (COLS//2, ROWS//2), (COLS//2, ROWS//2)]
+    food = spawn_food(set(snake))
+    score = 0
+    DIRECTION = (0, 1)
+    game_state = "playing"
+
+
 while is_running:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         if e.type == pygame.KEYDOWN:
-            if e.key in DIRECTION_MAP:
-                new_direction = DIRECTION_MAP[e.key]
+            if game_state == "game_over":
+                if e.key == pygame.K_r:
+                    reset_game()
+            elif game_state == "playing":
+                if e.key in DIRECTION_MAP:
+                    new_direction = DIRECTION_MAP[e.key]
+                    if (new_direction[0] != -DIRECTION[0] or
+                       new_direction[1] != -DIRECTION[1]):
+                        DIRECTION = new_direction
 
-                if (new_direction[0] != -DIRECTION[0] or
-                   new_direction[1] != -DIRECTION[1]):
-                    DIRECTION = new_direction
+    if game_state == "playing":
+        if not move_snake():
+            pass
 
-    if not move_snake():
-        pygame.quit()
-        sys.exit()
+    # Draw the game
     screen.fill(BG)
     for seg in snake:
         draw_cell(seg, SNAKE_COLOR)
     draw_cell(food, FOOD_COLOR)
     draw_grid()
     show_score()
+
+    # Draw game over screen
+    if game_state == "game_over":
+        draw_game_over()
+
     pygame.display.flip()
     clock.tick(10)
