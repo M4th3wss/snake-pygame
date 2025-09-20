@@ -21,7 +21,7 @@ Guide the snake to eat food, grow longer, and try not to crash!
  ```bash
 python main.py
 ```
-##How to Play
+## How to Play
 
 1.Move the snake to eat food.
 
