@@ -42,11 +42,30 @@ snake = [(COLS//2, ROWS//2), (COLS//2, ROWS//2), (COLS//2, ROWS//2)]
 score = 0
 test_font = pygame.font.Font('Minecraft.ttf', 50)
 
+# HighScore
+high_score = 0
+HIGH_SCORE_FILE = "highscore.txt"
+
+
+def load_high_score():
+    global high_score
+    try:
+        with open(HIGH_SCORE_FILE, 'r') as file:
+            high_score = int(file.read().strip())
+    except (FileNotFoundError, ValueError):
+        high_score = 0
+
+
+def save_high_score():
+    with open(HIGH_SCORE_FILE, 'w') as file:
+        file.write(str(high_score))
+
 
 def show_score():
     txt_surf = test_font.render(f"Score: {score}", False, (255, 255, 0))
     txt_rect = txt_surf.get_rect(center=(WIDTH / 2, HEIGHT - 420))
     screen.blit(txt_surf, txt_rect)
+
 
     # FOOD
 food = None
@@ -75,7 +94,7 @@ def draw_grid():
 
 
 def move_snake():
-    global snake, food, score, game_state
+    global snake, food, score, game_state, high_score
     # თავის პოზიცია
     head_x, head_y = snake[0]
 
@@ -91,13 +110,18 @@ def move_snake():
 
     if new_head in snake:
         game_state = "game_over"
+        if score > high_score:
+            high_score = score
+            save_high_score()
         return False
 
     snake.insert(0, new_head)
 
     if new_head == food:
         food = spawn_food(set(snake))
+
         score += 1
+
     else:
         snake.pop()
 
@@ -123,17 +147,25 @@ def draw_game_over():
     score_txt_rect = score_txt_surf.get_rect(center=(WIDTH//2, HEIGHT//2 - 10))
     screen.blit(score_txt_surf, score_txt_rect)
 
+    # High score text
+    high_score_txt_surf = test_font.render(
+        f"High Score: {high_score}", False, (0, 255, 255))
+    high_score_txt_rect = high_score_txt_surf.get_rect(
+        center=(WIDTH//2, HEIGHT//2 + 40))
+    screen.blit(high_score_txt_surf, high_score_txt_rect)
+
     # Restart instruction
     restart_txt_surf = test_font.render(
         "Press R to Restart", False, (100, 255, 100))
     restart_txt_rect = restart_txt_surf.get_rect(
-        center=(WIDTH//2, HEIGHT//2 + 40))
+        center=(WIDTH//2, HEIGHT//2 + 90))
     screen.blit(restart_txt_surf, restart_txt_rect)
 
 # ResetGame
 
 
 def reset_game():
+
     global snake, food, score, DIRECTION, game_state
     snake = [(COLS//2, ROWS//2), (COLS//2, ROWS//2), (COLS//2, ROWS//2)]
     food = spawn_food(set(snake))
