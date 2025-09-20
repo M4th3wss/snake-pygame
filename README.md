@@ -21,10 +21,10 @@ Guide the snake to eat food, grow longer, and try not to crash!
  ```bash
 python main.py
 ```
-How to Play
+##How to Play
 
-Move the snake to eat food.
+1.Move the snake to eat food.
 
-Each food increases your score and snake length.
+2.Each food increases your score and snake length.
 
-The game ends if you hit the wall or run into yourself.
+3.The game ends if you hit the wall or run into yourself.
